@@ -1,7 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿/*----------------------------------------------------------------
+    Copyright (C) 2015 Senparc
+    
+    文件名：ResponseMessageBase.cs
+    文件功能描述：响应回复消息基类
+    
+    
+    创建标识：Senparc - 20150313
+    
+    修改标识：Senparc - 20150313
+    修改描述：整理接口
+----------------------------------------------------------------*/
+
+using System;
 using System.Xml.Linq;
 using Senparc.Weixin.Entities;
 using Senparc.Weixin.Exceptions;
@@ -9,7 +19,7 @@ using Senparc.Weixin.QY.Helpers;
 
 namespace Senparc.Weixin.QY.Entities
 {
-	public interface IResponseMessageBase : Senparc.Weixin.Entities.IResponseMessageBase, IMessageBase
+	public interface IResponseMessageBase : Weixin.Entities.IResponseMessageBase, IMessageBase
 	{
 		ResponseMsgType MsgType { get; }
 		//string Content { get; set; }

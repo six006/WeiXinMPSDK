@@ -1,14 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿/*----------------------------------------------------------------
+    Copyright (C) 2015 Senparc
+    
+    文件名：WeixinUserInfoResult.cs
+    文件功能描述：获取用户信息返回结果
+    
+    
+    创建标识：Senparc - 20150211
+    
+    修改标识：Senparc - 20150303
+    修改描述：整理接口
+----------------------------------------------------------------*/
+
+using Senparc.Weixin.Entities;
 
 namespace Senparc.Weixin.MP.Entities
 {
     /// <summary>
     /// 用户信息
     /// </summary>
-    public class WeixinUserInfoResult
+    public class WeixinUserInfoResult : WxJsonResult
     {
         /// <summary>
         /// 用户是否订阅该公众号标识，值为0时，拉取不到其余信息

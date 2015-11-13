@@ -1,15 +1,39 @@
-﻿using System;
-using System.Collections;
+﻿/*----------------------------------------------------------------
+    Copyright (C) 2015 Senparc
+    
+    文件名：CommonApi.Menu.cs
+    文件功能描述：通用自定义菜单接口
+    
+    
+    创建标识：Senparc - 20150211
+    
+    修改标识：Senparc - 20150303
+    修改描述：整理接口
+ 
+    修改标识：Senparc - 20150312
+    修改描述：开放代理请求超时时间
+ 
+    修改标识：Senparc - 201503232
+    修改描述：修改字符串是否为空判断方式（感谢dusdong）
+ 
+    修改标识：Senparc - 20150703
+    修改描述：改用accessTokenOrAppId参数
+----------------------------------------------------------------*/
+
+/*
+    API：http://mp.weixin.qq.com/wiki/13/43de8269be54a0a6f64413e4dfa94f39.html
+ */
+
+using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
 using System.Text;
 using System.Web.Script.Serialization;
-using Senparc.Weixin.MP.Entities;
-using Senparc.Weixin.MP.Entities.Menu;
+using Senparc.Weixin.Entities;
 using Senparc.Weixin.Exceptions;
 using Senparc.Weixin.HttpUtility;
+using Senparc.Weixin.MP.Entities;
+using Senparc.Weixin.MP.Entities.Menu;
 
 namespace Senparc.Weixin.MP.CommonAPIs
 {
@@ -29,26 +53,30 @@ namespace Senparc.Weixin.MP.CommonAPIs
         /// <summary>
         /// 创建菜单
         /// </summary>
-        /// <param name="accessToken"></param>
+        /// <param name="accessTokenOrAppId">AccessToken或AppId。当为AppId时，如果AccessToken错误将自动获取一次。当为null时，获取当前注册的第一个AppId。</param>
         /// <param name="buttonData">菜单内容</param>
         /// <returns></returns>
-        public static WxJsonResult CreateMenu(string accessToken, ButtonGroup buttonData)
+        public static WxJsonResult CreateMenu(string accessTokenOrAppId, ButtonGroup buttonData, int timeOut = Config.TIME_OUT)
         {
-            var urlFormat = "https://api.weixin.qq.com/cgi-bin/menu/create?access_token={0}";
-            ////对特殊符号进行URL转义
-            //foreach (var button in buttonData.button)
-            //{
-            //    button.name = ButtonNameEncode(button.name);//button.name.UrlEncode();
-            //    if (button is SubButton)
-            //    {
-            //        var subButtonList = button as SubButton;
-            //        foreach (var subButton in subButtonList.sub_button)
-            //        {
-            //            subButton.name = ButtonNameEncode(button.name);//button.name.UrlEncode();
-            //        }
-            //    }
-            //}
-            return CommonJsonSend.Send(accessToken, urlFormat, buttonData);
+            return ApiHandlerWapper.TryCommonApi(accessToken =>
+             {
+                 var urlFormat = "https://api.weixin.qq.com/cgi-bin/menu/create?access_token={0}";
+                 ////对特殊符号进行URL转义
+                 //foreach (var button in buttonData.button)
+                 //{
+                 //    button.name = ButtonNameEncode(button.name);//button.name.UrlEncode();
+                 //    if (button is SubButton)
+                 //    {
+                 //        var subButtonList = button as SubButton;
+                 //        foreach (var subButton in subButtonList.sub_button)
+                 //        {
+                 //            subButton.name = ButtonNameEncode(button.name);//button.name.UrlEncode();
+                 //        }
+                 //    }
+                 //}
+                 return CommonJsonSend.Send(accessToken, urlFormat, buttonData, timeOut: timeOut);
+
+             }, accessTokenOrAppId);
         }
 
         #region GetMenu
@@ -141,31 +169,35 @@ namespace Senparc.Weixin.MP.CommonAPIs
         /// </summary>
         /// <param name="accessToken"></param>
         /// <returns></returns>
-        public static GetMenuResult GetMenu(string accessToken)
+        public static GetMenuResult GetMenu(string accessTokenOrAppId)
         {
-            var url = string.Format("https://api.weixin.qq.com/cgi-bin/menu/get?access_token={0}", accessToken);
-
-            var jsonString = HttpUtility.RequestUtility.HttpGet(url, Encoding.UTF8);
-            //var finalResult = GetMenuFromJson(jsonString);
-
-            GetMenuResult finalResult;
-            JavaScriptSerializer js = new JavaScriptSerializer();
-            try
+            return ApiHandlerWapper.TryCommonApi(accessToken =>
             {
-                var jsonResult = js.Deserialize<GetMenuResultFull>(jsonString);
-                if (jsonResult.menu == null || jsonResult.menu.button.Count == 0)
+                var url = string.Format("https://api.weixin.qq.com/cgi-bin/menu/get?access_token={0}", accessToken);
+
+                var jsonString = RequestUtility.HttpGet(url, Encoding.UTF8);
+                //var finalResult = GetMenuFromJson(jsonString);
+
+                GetMenuResult finalResult;
+                JavaScriptSerializer js = new JavaScriptSerializer();
+                try
                 {
-                    throw new WeixinException(jsonResult.errmsg);
+                    var jsonResult = js.Deserialize<GetMenuResultFull>(jsonString);
+                    if (jsonResult.menu == null || jsonResult.menu.button.Count == 0)
+                    {
+                        throw new WeixinException(jsonResult.errmsg);
+                    }
+
+                    finalResult = GetMenuFromJsonResult(jsonResult);
+                }
+                catch (WeixinException ex)
+                {
+                    finalResult = null;
                 }
 
-                finalResult = GetMenuFromJsonResult(jsonResult);
-            }
-            catch (WeixinException ex)
-            {
-                finalResult = null;
-            }
+                return finalResult;
 
-            return finalResult;
+            }, accessTokenOrAppId);
         }
 
         /// <summary>
@@ -182,11 +214,11 @@ namespace Senparc.Weixin.MP.CommonAPIs
                 ButtonGroup bg = new ButtonGroup();
                 foreach (var rootButton in resultFull.menu.button)
                 {
-                    if (rootButton.name == null)
+                    if (string.IsNullOrEmpty(rootButton.name))
                     {
                         continue;//没有设置一级菜单
                     }
-                    var availableSubButton = rootButton.sub_button.Count(z => !string.IsNullOrEmpty(z.name));//可用二级菜单按钮数量
+                    var availableSubButton = rootButton.sub_button == null ? 0 : rootButton.sub_button.Count(z => !string.IsNullOrEmpty(z.name));//可用二级菜单按钮数量
                     if (availableSubButton == 0)
                     {
                         //底部单击按钮
@@ -201,11 +233,11 @@ namespace Senparc.Weixin.MP.CommonAPIs
                         {
                             //点击
                             bg.button.Add(new SingleClickButton()
-                                              {
-                                                  name = rootButton.name,
-                                                  key = rootButton.key,
-                                                  type = rootButton.type
-                                              });
+                            {
+                                name = rootButton.name,
+                                key = rootButton.key,
+                                type = rootButton.type
+                            });
                         }
                         else if (rootButton.type.Equals("VIEW", StringComparison.OrdinalIgnoreCase))
                         {
@@ -290,7 +322,7 @@ namespace Senparc.Weixin.MP.CommonAPIs
 
                         foreach (var subSubButton in rootButton.sub_button)
                         {
-                            if (subSubButton.name == null)
+                            if (string.IsNullOrEmpty(subSubButton.name))
                             {
                                 continue; //没有设置菜单
                             }
@@ -387,9 +419,9 @@ namespace Senparc.Weixin.MP.CommonAPIs
                 }
 
                 result = new GetMenuResult()
-                             {
-                                 menu = bg
-                             };
+                {
+                    menu = bg
+                };
             }
             catch (Exception ex)
             {
@@ -405,11 +437,16 @@ namespace Senparc.Weixin.MP.CommonAPIs
         /// </summary>
         /// <param name="accessToken"></param>
         /// <returns></returns>
-        public static WxJsonResult DeleteMenu(string accessToken)
+        public static WxJsonResult DeleteMenu(string accessTokenOrAppId)
         {
-            var url = string.Format("https://api.weixin.qq.com/cgi-bin/menu/delete?access_token={0}", accessToken);
-            var result = Get.GetJson<WxJsonResult>(url);
-            return result;
+            return ApiHandlerWapper.TryCommonApi(accessToken =>
+            {
+                var url = string.Format("https://api.weixin.qq.com/cgi-bin/menu/delete?access_token={0}", accessToken);
+
+                return Get.GetJson<WxJsonResult>(url);
+
+            }, accessTokenOrAppId);
+            
         }
     }
 }

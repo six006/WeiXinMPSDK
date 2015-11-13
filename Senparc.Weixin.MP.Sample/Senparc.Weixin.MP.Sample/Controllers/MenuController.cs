@@ -1,4 +1,14 @@
-﻿using System;
+﻿/*----------------------------------------------------------------
+    Copyright (C) 2015 Senparc
+    
+    文件名：MenuController.cs
+    文件功能描述：自定义菜单设置工具Controller
+    
+    
+    创建标识：Senparc - 20150312
+----------------------------------------------------------------*/
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -36,14 +46,14 @@ namespace Senparc.Weixin.MP.Sample.Controllers
         {
             try
             {
-                if (!AccessTokenContainer.CheckRegistered(appId))
-                {
-                    AccessTokenContainer.Register(appId, appSecret);
-                }
-                var result = AccessTokenContainer.GetTokenResult(appId); //CommonAPIs.CommonApi.GetToken(appId, appSecret);
+                //if (!AccessTokenContainer.CheckRegistered(appId))
+                //{
+                //    AccessTokenContainer.Register(appId, appSecret);
+                //}
+                var result = CommonAPIs.CommonApi.GetToken(appId, appSecret);//AccessTokenContainer.GetTokenResult(appId);
 
                 //也可以直接一步到位：
-                //var result = AccessTokenContainer.TryGetToken(appId, appSecret);
+                //var result = AccessTokenContainer.TryGetAccessToken(appId, appSecret);
                 return Json(result, JsonRequestBehavior.AllowGet);
             }
             catch (Exception)

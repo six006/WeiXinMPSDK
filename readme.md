@@ -1,15 +1,25 @@
-微信公众平台及企业号C# SDK：Senparc.Weixin.MP.dll、Senparc.Weixin.QY.dll
+
+微信C# SDK
 =================
+微信公众号：Senparc.Weixin.MP.dll
+-----------------
+微信企业号：Senparc.Weixin.QY.dl
+-----------------
+微信开放平台：Senparc.Weixin.Open.dll
+-----------------
 
+本库为.NET4.5，其他.NET版本请看各自分支。
 
-已经支持所有微信5.x API，包括自定义菜单、模板信息接口、素材上传接口、群发接口、多客服接口、支付接口、微小店接口等。
+已经支持所有微信6 API，包括自定义菜单、模板信息接口、素材上传接口、群发接口、多客服接口、支付接口、微小店接口、卡券接口等。
 
 （同时由于易信的API目前与微信保持一致，此SDK也可以直接用于易信，如需使用易信的自定义菜单，通用接口改成易信的通讯地址即可）
 
 
 已经支持用户会话上下文（解决服务器无法使用Session处理用户信息的问题）。
 
-目前官方的API都已完美集成，除非有特殊说明，所有升级都会尽量确保向下兼容，所以已经发布的版本请放心使用或直接升级（覆盖）最新的[Senparc.Weixin.MP.dll](https://github.com/JeffreySu/WeiXinMPSDK/tree/master/Senparc.Weixin.MP.BuildOutPut)。
+已经全面支持微信公众号、企业号、开放平台的最新API。
+
+目前官方的API都已完美集成，除非有特殊说明，所有升级都会尽量确保向下兼容，所以已经发布的版本请放心使用或直接升级（覆盖）最新的[Senparc.Weixin.MP.dll](https://github.com/JeffreySu/WeiXinMPSDK/tree/master/Senparc.Weixin.MP.BuildOutPut)、[Senparc.Weixin.QY.dll](https://github.com/JeffreySu/WeiXinMPSDK/tree/master/Senparc.Weixin.MP.BuildOutPut) 、[Senparc.Weixin.Open.dll](https://github.com/JeffreySu/WeiXinMPSDK/tree/master/Senparc.Weixin.MP.BuildOutPut)  或 [Senparc.Weixin.dll](https://github.com/JeffreySu/WeiXinMPSDK/tree/master/Senparc.Weixin.MP.BuildOutPut) 。
 
 如果需要使用或修改此项目的源代码，建议先Fork。也欢迎将您修改的通用版本Pull Request过来。
 
@@ -17,15 +27,23 @@
 ----------------
 官网地址：http://weixin.senparc.com/
 
-源代码及最新更新：https://github.com/JeffreySu/WeiXinMPSDK
+系列教程：http://www.cnblogs.com/szw/archive/2013/05/14/weixin-course-index.html
 
-Q&A：https://github.com/JeffreySu/WeiXinMPSDK/wiki/QA
+微信技术交流社区：http://www.weiweihi.com/QA
 
 自定义菜单在线编辑工具：http://weixin.senparc.com/Menu
 
-系列教程：http://www.cnblogs.com/szw/archive/2013/05/14/weixin-course-index.html
+在线消息测试工具：http://weixin.senparc.com/SimulateTool
 
-技术交流QQ群：1群：300313885（已满） 2群：293958349（已满）  3群：342319110（已满） 4群：372212092（已满） 5群：377815480
+源代码及最新更新：https://github.com/JeffreySu/WeiXinMPSDK
+
+
+
+技术交流QQ群：
+1群：300313885（已满）
+2群：293958349（已满）  3群：342319110（已满） 4群：372212092（已满） 5群：377815480（已满）6群：425898825（已满）
+7群：482942254
+
 
 业务联系QQ：498977166
 
@@ -52,13 +70,15 @@ Q&A：https://github.com/JeffreySu/WeiXinMPSDK/wiki/QA
 
 > Senparc.Weixin.MP.MvcExtension：Senparc.Weixin.MP.MvcExtension.dll源码，为MVC4.0项目提供的扩展包。
 
-> Senparc.Weixin.MP.Sample：可以直接发布使用的Demo（ASP.NET MVC 4.0，需要.NET 4.0）
+> Senparc.Weixin.MP.Sample：可以直接发布使用的Demo（ASP.NET MVC 4.0）
 
-> Senparc.Weixin.MP.Sample.WebForms：可以直接发布使用的Demo（ASP.NET WebForms，需要.NET 3.5）
+> Senparc.Weixin.MP.Sample.WebForms：可以直接发布使用的Demo（ASP.NET WebForms）
 
 > Senparc.Weixin.MP：Senparc.Weixin.MP.dll 微信公众账号SDK源代码
 
 > Senparc.Weixin.QY：Senparc.Weixin.QY.dll 微信企业号SDK源代码
+
+> Senparc.Weixin.Open：Senparc.Weixin.Open.dll 第三方开放平台SDK源代码
 
 > Senparc.Wiexin：所有Senparc.Weixin.[x].dll 基础类库源代码
 
@@ -76,18 +96,22 @@ public readonly string Token = "weixin";
 /// </summary>
 [HttpGet]
 [ActionName("Index")]
-public ActionResult Get(string signature, string timestamp, string nonce, string echostr)
+public ActionResult Get(PostModel postModel, string echostr)
 {
-    if (CheckSignature.Check(signature, timestamp, nonce, Token))
+    if (CheckSignature.Check(postModel.Signature, postModel.Timestamp, postModel.Nonce, Token))
     {
-        return Content(echostr);//返回随机字符串则表示验证通过
+        return Content(echostr); //返回随机字符串则表示验证通过
     }
     else
     {
-        return Content("failed:" + signature + "," + CheckSignature.GetSignature(timestamp, nonce, Token));
+        return Content("failed:" + postModel.Signature + "," + MP.CheckSignature.GetSignature(postModel.Timestamp, postModel.Nonce, Token) + "。" +
+            "如果你在浏览器中看到这句话，说明此地址可以被作为微信公众账号后台的Url，请注意保持Token一致。");
     }
 }
 ```
+上述方法中的PostModel是一个包括了了Signature、Timestamp、Nonce（由微信服务器通过请求时的Url参数传入），以及AppId、Token、EncodingAESKey等一系列内部敏感的信息（需要自行传入）的实体类，同时也会在后面用到。
+
+
 下面这个Action（Post）用于接收来自微信服务器的Post请求（通常由用户发起），这里的if必不可少，之前的Get只提供微信后台保存Url时的验证，每次Post必须重新验证，否则很容易伪造请求。
 ```C#
 /// <summary>
@@ -95,9 +119,9 @@ public ActionResult Get(string signature, string timestamp, string nonce, string
 /// </summary>
 [HttpPost]
 [ActionName("Index")]
-public ActionResult Post(string signature, string timestamp, string nonce, string echostr)
+public ActionResult Post(PostModel postModel)
 {
-    if (!CheckSignature.Check(signature, timestamp, nonce, Token))
+    if (!CheckSignature.Check(postModel.Signature, postModel.Timestamp, postModel.Nonce, Token))
     {
         return Content("参数错误！");
     }
@@ -111,22 +135,25 @@ MessageHandler的处理流程非常简单：
 ``` C#
 [HttpPost]
 [ActionName("Index")]
-public ActionResult Post(string signature, string timestamp, string nonce, string echostr)
+public ActionResult Post(PostModel postModel)
 {
-    if (!CheckSignature.Check(signature, timestamp, nonce, Token))
+    if (!CheckSignature.Check(postModel.Signature, postModel.Timestamp, postModel.Nonce, Token))
     {
         return Content("参数错误！");
     }
+    
+    postModel.Token = Token;
+    postModel.EncodingAESKey = EncodingAESKey;//根据自己后台的设置保持一致
+    postModel.AppId = AppId;//根据自己后台的设置保持一致
 
-    var messageHandler = new CustomMessageHandler(Request.InputStream);//接收消息
+    var messageHandler = new CustomMessageHandler(Request.InputStream, postModel);//接收消息（第一步）
     
-    messageHandler.Execute();//执行微信处理过程
+    messageHandler.Execute();//执行微信处理过程（第二步）
     
-    //return Content(messageHandler.ResponseDocument.ToString());//v0.7-
-    return new WeixinResult(messageHandler);//v0.8+ with MvcExtension
+    return new FixWeixinBugWeixinResult(messageHandler);//返回（第三步）
 }
 ```
-整个消息的接收、处理、返回分别只需要一行代码。
+整个消息除了postModel的赋值以外，接收（第一步）、处理（第二步）、返回（第三步）分别只需要一行代码。
 
 上述代码中的CustomMessageHandler是一个自定义的类，继承自Senparc.Weixin.MP.MessageHandler.cs。MessageHandler是一个抽象类，包含了执行各种不同请求类型的抽象方法（如文字，语音，位置、图片等等），我们只需要在自己创建的CustomMessageHandler中逐个实现这些方法就可以了。刚建好的CustomMessageHandler.cs如下：
 ```C#
@@ -139,8 +166,8 @@ namespace Senparc.Weixin.MP.Sample.CustomerMessageHandler
 {
     public class CustomMessageHandler : MessageHandler<MessageContext>
     {
-        public CustomMessageHandler(Stream inputStream)
-            : base(inputStream)
+        public public CustomMessageHandler(Stream inputStream, PostModel postModel, int maxRecordCount = 0)
+            : base(inputStream, postModel, maxRecordCount)
         {
 
         }
@@ -200,6 +227,11 @@ Senparc.Weixin.QY.dll对企业号相关功能进行了封装，操作过程和�
 
 Nuget对应地址为：https://www.nuget.org/packages/Senparc.Weixin.QY
 
+###如何处理微开放平台请求？
+Senparc.Weixin.Open.dll对目前所有的开放平台API进行了封装，消息处理过程和微信公众账号SDK（Senparc.Weixin.MP）保持了一致，其他一些特殊的消息流程请先阅读官方的文档，然后对照Senparc.Weixin.MP.Sample中有关Open的Demo进行开发。
+
+Nuget对应地址为：https://www.nuget.org/packages/Senparc.Weixin.Open
+
 捐助
 --------------
 如果这个项目对您有用，我们欢迎各方任何形式的捐助，也包括参与到项目代码更新或意见反馈中来。谢谢！
@@ -214,7 +246,7 @@ License
 --------------
 FreeBSD License
 ```
-Copyright (c) 2013, Jeffrey Su <www.jeffreysu@gmail.com>
+Copyright (c) 2015, Jeffrey Su <www.jeffrey.su@gmail.com>, Suzhou Senparc Network Technology Co.,Ltd.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

@@ -1,16 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿/*----------------------------------------------------------------
+    Copyright (C) 2015 Senparc
+  
+    文件名：ResponseMessageFactory.cs
+    文件功能描述：获取XDocument转换后的IResponseMessageBase实例
+    
+    
+    创建标识：Senparc - 20150211
+    
+    修改标识：Senparc - 20150303
+    修改描述：整理接口
+----------------------------------------------------------------*/
+
+using System;
 using System.Xml.Linq;
 using Senparc.Weixin.Exceptions;
-using Senparc.Weixin.Helpers;
+using Senparc.Weixin.MP.Entities;
+using Senparc.Weixin.MP.Helpers;
 
 namespace Senparc.Weixin.MP
 {
-    using Senparc.Weixin.MP.Entities;
-    using Senparc.Weixin.MP.Helpers;
-
     public static class ResponseMessageFactory
     {
         //<?xml version="1.0" encoding="utf-8"?>

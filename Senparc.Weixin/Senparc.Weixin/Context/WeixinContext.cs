@@ -1,12 +1,23 @@
-﻿/*
+﻿/*----------------------------------------------------------------
+    Copyright (C) 2015 Senparc
+    
+    文件名：WeixinContext.cs
+    文件功能描述：微信消息上下文（全局）
+    
+    
+    创建标识：Senparc - 20150211
+    
+    修改标识：Senparc - 20150303
+    修改描述：整理接口
+----------------------------------------------------------------*/
+
+/*
  * V2.0
  */
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using Senparc.Weixin.Entities;
 
 namespace Senparc.Weixin.Context
@@ -23,10 +34,10 @@ namespace Senparc.Weixin.Context
     }
 
     #region 废除接口
-    //public interface IWeixinContext<TM, TRest, TResp>
-    //    where TM : class, IMessageContext<TRest, TResp>, new()
-    //    where TRest : IRequestMessageBase
-    //    where TResp : IResponseMessageBase
+    //public interface IWeixinContext<TM, TRequest, TResponse>
+    //    where TM : class, IMessageContext<TRequest, TResponse>, new()
+    //    where TRequest : IRequestMessageBase
+    //    where TResponse : IResponseMessageBase
     //{
     //    /// <summary>
     //    /// 所有MessageContext集合，不要直接操作此对象
@@ -35,7 +46,7 @@ namespace Senparc.Weixin.Context
     //    /// <summary>
     //    /// MessageContext列队（LastActiveTime升序排列）,不要直接操作此对象
     //    /// </summary>
-    //    MessageQueue<TM, TRest, TResp> MessageQueue { get; set; }
+    //    MessageQueue<TM, TRequest, TResponse> MessageQueue { get; set; }
 
     //    /// <summary>
     //    /// 每一个MessageContext过期时间
@@ -47,8 +58,8 @@ namespace Senparc.Weixin.Context
     //    /// </summary>
     //    int MaxRecordCount { get; set; }
 
-    //    TM GetMessageContext(TRest requestMessage);
-    //    TM GetMessageContext(TResp responseMessage);
+    //    TM GetMessageContext(TRequest requestMessage);
+    //    TM GetMessageContext(TResponse responseMessage);
     //}
     #endregion
 
@@ -56,10 +67,10 @@ namespace Senparc.Weixin.Context
     /// 微信消息上下文（全局）
     /// 默认过期时间：90分钟
     /// </summary>
-    public class WeixinContext<TM, TRest, TResp> /*: IWeixinContext<TM, TRest, TResp>*/
-        where TM : class, IMessageContext<TRest, TResp>, new() //TODO:TRest, TResp直接写明基类类型
-        where TRest : IRequestMessageBase
-        where TResp : IResponseMessageBase
+    public class WeixinContext<TM, TRequest, TResponse> /*: IWeixinContext<TM, TRequest, TResponse>*/
+        where TM : class, IMessageContext<TRequest, TResponse>, new() //TODO:TRequest, TResponse直接写明基类类型
+        where TRequest : IRequestMessageBase
+        where TResponse : IResponseMessageBase
     {
         private int _maxRecordCount;
 
@@ -70,7 +81,7 @@ namespace Senparc.Weixin.Context
         /// <summary>
         /// MessageContext列队（LastActiveTime升序排列）,不要直接操作此对象
         /// </summary>
-        public MessageQueue<TM, TRest, TResp> MessageQueue { get; set; }
+        public MessageQueue<TM, TRequest, TResponse> MessageQueue { get; set; }
 
         /// <summary>
         /// 每一个MessageContext过期时间
@@ -94,7 +105,7 @@ namespace Senparc.Weixin.Context
         public void Restore()
         {
             MessageCollection = new Dictionary<string, TM>(StringComparer.OrdinalIgnoreCase);
-            MessageQueue = new MessageQueue<TM, TRest, TResp>();
+            MessageQueue = new MessageQueue<TM, TRequest, TResponse>();
             ExpireMinutes = 90;
         }
 
@@ -180,7 +191,7 @@ namespace Senparc.Weixin.Context
         /// 获取MessageContext，如果不存在，使用requestMessage信息初始化一个，并返回原始实例
         /// </summary>
         /// <returns></returns>
-        public TM GetMessageContext(TRest requestMessage)
+        public TM GetMessageContext(TRequest requestMessage)
         {
             lock (WeixinContextGlobal.Lock)
             {
@@ -192,7 +203,7 @@ namespace Senparc.Weixin.Context
         /// 获取MessageContext，如果不存在，使用requestMessage信息初始化一个，并返回原始实例
         /// </summary>
         /// <returns></returns>
-        public TM GetMessageContext(TResp responseMessage)
+        public TM GetMessageContext(TResponse responseMessage)
         {
             lock (WeixinContextGlobal.Lock)
             {
@@ -204,7 +215,7 @@ namespace Senparc.Weixin.Context
         /// 记录请求信息
         /// </summary>
         /// <param name="requestMessage">请求信息</param>
-        public void InsertMessage(TRest requestMessage)
+        public void InsertMessage(TRequest requestMessage)
         {
             lock (WeixinContextGlobal.Lock)
             {
@@ -232,7 +243,7 @@ namespace Senparc.Weixin.Context
         /// 记录响应信息
         /// </summary>
         /// <param name="responseMessage">响应信息</param>
-        public void InsertMessage(TResp responseMessage)
+        public void InsertMessage(TResponse responseMessage)
         {
             lock (WeixinContextGlobal.Lock)
             {
@@ -246,7 +257,7 @@ namespace Senparc.Weixin.Context
         /// </summary>
         /// <param name="userName">用户名（OpenId）</param>
         /// <returns></returns>
-        public TRest GetLastRequestMessage(string userName)
+        public TRequest GetLastRequestMessage(string userName)
         {
             lock (WeixinContextGlobal.Lock)
             {
@@ -260,7 +271,7 @@ namespace Senparc.Weixin.Context
         /// </summary>
         /// <param name="userName">用户名（OpenId）</param>
         /// <returns></returns>
-        public TResp GetLastResponseMessage(string userName)
+        public TResponse GetLastResponseMessage(string userName)
         {
             lock (WeixinContextGlobal.Lock)
             {

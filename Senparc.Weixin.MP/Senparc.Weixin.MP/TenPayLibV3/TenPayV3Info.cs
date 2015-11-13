@@ -1,7 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿/*----------------------------------------------------------------
+    Copyright (C) 2015 Senparc
+ 
+    文件名：TenPayV3Info.cs
+    文件功能描述：微信支付V3基础信息储存类
+    
+    
+    创建标识：Senparc - 20150211
+    
+    修改标识：Senparc - 20150303
+    修改描述：整理接口
+----------------------------------------------------------------*/
 
 namespace Senparc.Weixin.MP.TenPayLibV3
 {
@@ -27,7 +35,7 @@ namespace Senparc.Weixin.MP.TenPayLibV3
         /// </summary>
         public string Key { get; set; }
         /// <summary>
-        /// 支付完成后的回调处理页面,*替换成notify_url.asp所在路径
+        /// 支付完成后的回调处理页面
         /// </summary>
         public string TenPayV3Notify { get; set; } // = "http://localhost/payNotifyUrl.aspx";
 

@@ -1,11 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿/*----------------------------------------------------------------
+    文件名：WXBizMsgCrypt.cs
+    文件功能描述：加解密算法
+    
+    
+    创建标识：Senparc - 20150211
+    
+    修改标识：Senparc - 20150303
+    修改描述：整理接口
+----------------------------------------------------------------*/
+
+using System;
+using System.Collections;
+using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
-using System.Collections;
 //using System.Web;
-using System.Security.Cryptography;
+
 //-40001 ： 签名验证错误
 //-40002 :  xml解析失败
 //-40003 :  sha加密生成签名失败
@@ -145,7 +155,7 @@ namespace Tencent
             return 0;
         }
 
-        public class DictionarySort : System.Collections.IComparer
+        public class DictionarySort : IComparer
         {
             public int Compare(object oLeft, object oRight)
             {

@@ -1,12 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿/*----------------------------------------------------------------
+    Copyright (C) 2015 Senparc
+    
+    文件名：SingleViewButton.cs
+    文件功能描述：Url按钮
+    
+    
+    创建标识：Senparc - 20150211
+    
+    修改标识：Senparc - 20150303
+    修改描述：整理接口
+----------------------------------------------------------------*/
 
 namespace Senparc.Weixin.MP.Entities.Menu
 {
     /// <summary>
-    /// Url按键
+    /// Url按钮
     /// </summary>
     public class SingleViewButton : SingleButton
     {

@@ -1,7 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Xml.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Senparc.Weixin.Exceptions;
+using Senparc.Weixin.MP.AdvancedAPIs;
+using Senparc.Weixin.MP.AdvancedAPIs.User;
 using Senparc.Weixin.MP.CommonAPIs;
 using Senparc.Weixin.MP.Entities;
 
@@ -11,8 +16,44 @@ namespace Senparc.Weixin.MP.Test.CommonAPIs
     //[TestClass]
     public partial class CommonApiTest
     {
-        protected string _appId = "wxd838c2d5a1bc5801"; //换成你的信息
-        protected string _appSecret = ""; //换成你的信息
+        private dynamic _appConfig;
+        protected dynamic AppConfig
+        {
+            get
+            {
+                if (_appConfig == null)
+                {
+                    if (File.Exists("../../test.config"))
+                    {
+                        var doc = XDocument.Load("../../test.config");
+                        _appConfig = new
+                        {
+                            AppId = doc.Root.Element("AppId").Value,
+                            Secret = doc.Root.Element("Secret").Value
+                        };
+                    }
+                    else
+                    {
+                        _appConfig = new
+                        {
+                            AppId = "YourAppId", //换成你的信息
+                            Secret = "YourSecret"//换成你的信息
+                        };
+                    }
+                }
+                return _appConfig;
+            }
+        }
+
+        protected string _appId
+        {
+            get { return AppConfig.AppId; }
+        }
+
+        protected string _appSecret
+        {
+            get { return AppConfig.Secret; }
+        }
 
 
         /* 由于获取accessToken有次数限制，为了节约请求，
@@ -23,10 +64,30 @@ namespace Senparc.Weixin.MP.Test.CommonAPIs
 
         protected string _testOpenId = "oIb08txj1En8hGXzHRvAjf-3X9Oc";//换成实际关注者的OpenId
 
+        /// <summary>
+        /// 自动获取Openid
+        /// </summary>
+        /// <param name="getNew">是否从服务器上强制获取一个</param>
+        /// <returns></returns>
+        protected string getTestOpenId(bool getNew)
+        {
+            if (getNew || string.IsNullOrEmpty(_testOpenId))
+            {
+                var accessToken = AccessTokenContainer.GetAccessToken(_appId);
+                var openIdResult = UserApi.Get(accessToken, null);
+                _testOpenId = openIdResult.data.openid.First();
+            }
+            return _testOpenId;
+        }
+
         public CommonApiTest()
         {
             //全局只需注册一次
             AccessTokenContainer.Register(_appId, _appSecret);
+
+            //v13.3.0之后，JsApiTicketContainer已经合并入AccessTokenContainer，已经不需要单独注册
+            ////全局只需注册一次
+            //JsApiTicketContainer.Register(_appId, _appSecret);
         }
 
         [TestMethod]
@@ -58,7 +119,7 @@ namespace Senparc.Weixin.MP.Test.CommonAPIs
         {
             try
             {
-                var accessToken = AccessTokenContainer.GetToken(_appId);
+                var accessToken = AccessTokenContainer.GetAccessToken(_appId);
                 var result = CommonApi.GetUserInfo(accessToken, _testOpenId);
                 Assert.IsNotNull(result);
             }
@@ -66,6 +127,15 @@ namespace Senparc.Weixin.MP.Test.CommonAPIs
             {
                 //如果不参加内测，只是“服务号”，这类接口仍然不能使用，会抛出异常：错误代码：45009：api freq out of limit
             }
+        }
+
+        [TestMethod]
+        public void GetTicketTest()
+        {
+            var tokenResult = CommonApi.GetTicket(_appId, _appSecret);
+            Assert.IsNotNull(tokenResult);
+            Assert.IsTrue(tokenResult.ticket.Length > 0);
+            Assert.IsTrue(tokenResult.expires_in > 0);
         }
     }
 }

@@ -1,7 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿/*----------------------------------------------------------------
+    Copyright (C) 2015 Senparc
+    
+    文件名：SinglePicPhotoOrAlbumButton.cs
+    文件功能描述：微信客户端将弹出选择器供用户选择“拍照”或者“从手机相册选择”按钮
+    
+    
+    创建标识：Senparc - 20150313
+    
+    修改标识：Senparc - 20150313
+    修改描述：整理接口
+----------------------------------------------------------------*/
 
 namespace Senparc.Weixin.QY.Entities.Menu
 {

@@ -1,4 +1,24 @@
-﻿using System;
+﻿/*----------------------------------------------------------------
+    Copyright (C) 2015 Senparc
+    
+    文件名：CommonApi.Menu.cs
+    文件功能描述：自定义菜单API
+    
+    
+    创建标识：Senparc - 20150313
+    
+    修改标识：Senparc - 20150313
+    修改描述：整理接口
+ 
+    修改标识：Senparc - 20150313
+    修改描述：开放代理请求超时时间
+----------------------------------------------------------------*/
+
+/*
+    获取AccessToken API地址：http://qydev.weixin.qq.com/wiki/index.php?title=%E8%87%AA%E5%AE%9A%E4%B9%89%E8%8F%9C%E5%8D%95
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,8 +39,9 @@ namespace Senparc.Weixin.QY.CommonAPIs
         /// <param name="accessToken"></param>
         /// <param name="agentId"></param>
         /// <param name="buttonData">菜单内容</param>
+        /// <param name="timeOut">代理请求超时时间（毫秒）</param>
         /// <returns></returns>
-        public static WxJsonResult CreateMenu(string accessToken, int agentId, ButtonGroup buttonData)
+        public static QyJsonResult CreateMenu(string accessToken, int agentId, ButtonGroup buttonData, int timeOut = Config.TIME_OUT)
         {
             var urlFormat = string.Format("https://qyapi.weixin.qq.com/cgi-bin/menu/create?access_token={0}&agentid={1}", accessToken, agentId);
             ////对特殊符号进行URL转义
@@ -36,7 +57,7 @@ namespace Senparc.Weixin.QY.CommonAPIs
             //        }
             //    }
             //}
-            return CommonJsonSend.Send(null, urlFormat, buttonData);
+            return CommonJsonSend.Send(null, urlFormat, buttonData, CommonJsonSendType.POST, timeOut);
         }
 
         #region GetMenu
@@ -135,7 +156,7 @@ namespace Senparc.Weixin.QY.CommonAPIs
         {
             var url = string.Format("https://qyapi.weixin.qq.com/cgi-bin/menu/get?access_token={0}&agentid={1}", accessToken, agentId);
 
-            var jsonString = HttpUtility.RequestUtility.HttpGet(url, Encoding.UTF8);
+            var jsonString = RequestUtility.HttpGet(url, Encoding.UTF8);
             //var finalResult = GetMenuFromJson(jsonString);
 
             GetMenuResult finalResult;
@@ -207,9 +228,65 @@ namespace Senparc.Weixin.QY.CommonAPIs
                                 type = rootButton.type
                             });
                         }
+                        else if (rootButton.type.Equals("LOCATION_SELECT", StringComparison.OrdinalIgnoreCase))
+                        {
+                            //弹出地理位置选择器
+                            bg.button.Add(new SingleLocationSelectButton()
+                            {
+                                name = rootButton.name,
+                                key = rootButton.key,
+                                type = rootButton.type
+                            });
+                        }
+                        else if (rootButton.type.Equals("PIC_PHOTO_OR_ALBUM", StringComparison.OrdinalIgnoreCase))
+                        {
+                            //弹出拍照或者相册发图
+                            bg.button.Add(new SinglePicPhotoOrAlbumButton()
+                            {
+                                name = rootButton.name,
+                                key = rootButton.key,
+                                type = rootButton.type
+                            });
+                        }
+                        else if (rootButton.type.Equals("PIC_SYSPHOTO", StringComparison.OrdinalIgnoreCase))
+                        {
+                            //弹出系统拍照发图
+                            bg.button.Add(new SinglePicSysphotoButton()
+                            {
+                                name = rootButton.name,
+                                key = rootButton.key,
+                                type = rootButton.type
+                            });
+                        }
+                        else if (rootButton.type.Equals("PIC_WEIXIN", StringComparison.OrdinalIgnoreCase))
+                        {
+                            //弹出微信相册发图器
+                            bg.button.Add(new SinglePicWeixinButton()
+                            {
+                                name = rootButton.name,
+                                key = rootButton.key,
+                                type = rootButton.type
+                            });
+                        }
+                        else if (rootButton.type.Equals("SCANCODE_PUSH", StringComparison.OrdinalIgnoreCase))
+                        {
+                            //扫码推事件
+                            bg.button.Add(new SingleScancodePushButton()
+                            {
+                                name = rootButton.name,
+                                key = rootButton.key,
+                                type = rootButton.type
+                            });
+                        }
                         else
                         {
-                            //未处理情况
+                            //扫码推事件且弹出“消息接收中”提示框
+                            bg.button.Add(new SingleScancodeWaitmsgButton()
+                            {
+                                name = rootButton.name,
+                                key = rootButton.key,
+                                type = rootButton.type
+                            });
                         }
                     }
                     else
@@ -252,9 +329,65 @@ namespace Senparc.Weixin.QY.CommonAPIs
                                     type = subSubButton.type
                                 });
                             }
+                            else if (subSubButton.type.Equals("LOCATION_SELECT", StringComparison.OrdinalIgnoreCase))
+                            {
+                                //弹出地理位置选择器
+                                subButton.sub_button.Add(new SingleLocationSelectButton()
+                                {
+                                    name = subSubButton.name,
+                                    key = subSubButton.key,
+                                    type = subSubButton.type
+                                });
+                            }
+                            else if (subSubButton.type.Equals("PIC_PHOTO_OR_ALBUM", StringComparison.OrdinalIgnoreCase))
+                            {
+                                //弹出拍照或者相册发图
+                                subButton.sub_button.Add(new SinglePicPhotoOrAlbumButton()
+                                {
+                                    name = subSubButton.name,
+                                    key = subSubButton.key,
+                                    type = subSubButton.type
+                                });
+                            }
+                            else if (subSubButton.type.Equals("PIC_SYSPHOTO", StringComparison.OrdinalIgnoreCase))
+                            {
+                                //弹出系统拍照发图
+                                subButton.sub_button.Add(new SinglePicSysphotoButton()
+                                {
+                                    name = subSubButton.name,
+                                    key = subSubButton.key,
+                                    type = subSubButton.type
+                                });
+                            }
+                            else if (subSubButton.type.Equals("PIC_WEIXIN", StringComparison.OrdinalIgnoreCase))
+                            {
+                                //弹出微信相册发图器
+                                subButton.sub_button.Add(new SinglePicWeixinButton()
+                                {
+                                    name = subSubButton.name,
+                                    key = subSubButton.key,
+                                    type = subSubButton.type
+                                });
+                            }
+                            else if (subSubButton.type.Equals("SCANCODE_PUSH", StringComparison.OrdinalIgnoreCase))
+                            {
+                                //扫码推事件
+                                subButton.sub_button.Add(new SingleScancodePushButton()
+                                {
+                                    name = subSubButton.name,
+                                    key = subSubButton.key,
+                                    type = subSubButton.type
+                                });
+                            }
                             else
                             {
-                                //未处理情况
+                                //扫码推事件且弹出“消息接收中”提示框
+                                subButton.sub_button.Add(new SingleScancodeWaitmsgButton()
+                                {
+                                    name = subSubButton.name,
+                                    key = subSubButton.key,
+                                    type = subSubButton.type
+                                });
                             }
                         }
                     }
@@ -280,10 +413,10 @@ namespace Senparc.Weixin.QY.CommonAPIs
         /// <param name="accessToken">调用接口凭证</param>
         /// <param name="agentId">企业应用的id，整型。可在应用的设置页面查看</param>
         /// <returns></returns>
-        public static WxJsonResult DeleteMenu(string accessToken, int agentId)
+        public static QyJsonResult DeleteMenu(string accessToken, int agentId)
         {
             var url = string.Format("https://qyapi.weixin.qq.com/cgi-bin/menu/delete?access_token={0}&agentid={1}", accessToken, agentId);
-            var result = Get.GetJson<WxJsonResult>(url);
+            var result = Get.GetJson<QyJsonResult>(url);
             return result;
         }
     }

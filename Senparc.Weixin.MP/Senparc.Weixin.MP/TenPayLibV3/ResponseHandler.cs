@@ -1,9 +1,24 @@
+/*----------------------------------------------------------------
+    Copyright (C) 2015 Senparc
+ 
+    文件名：ResponseHandler.cs
+    文件功能描述：微信支付V3 响应处理
+    
+    
+    创建标识：Senparc - 20150211
+    
+    修改标识：Senparc - 20150303
+    修改描述：整理接口
+----------------------------------------------------------------*/
+
 using System;
 using System.Collections;
 using System.Collections.Specialized;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Xml;
+using Senparc.Weixin.MP.Helpers;
 
 namespace Senparc.Weixin.MP.TenPayLibV3
 {
@@ -53,11 +68,6 @@ namespace Senparc.Weixin.MP.TenPayLibV3
         protected string Content;
 
         private string Charset = "gb2312";
-
-        /// <summary>
-        /// 参与签名的参数列表
-        /// </summary>
-        private static string SignField = "appid,appkey,timestamp,openid,noncestr,issubscribe";
 
 		protected HttpContext HttpContext;
 
@@ -179,7 +189,7 @@ namespace Senparc.Weixin.MP.TenPayLibV3
 			}
 
 			sb.Append("key=" + this.GetKey());
-            string sign = MD5Util.GetMD5(sb.ToString(), GetCharset()).ToLower();
+            string sign = MD5UtilHelper.GetMD5(sb.ToString(), GetCharset()).ToLower();
             this.SetDebugInfo(sb.ToString() + " &sign=" + sign);
 			//debug信息
 			return GetParameter("sign").ToLower().Equals(sign); 
@@ -205,6 +215,30 @@ namespace Senparc.Weixin.MP.TenPayLibV3
 			
 		}
 
-		
+        /// <summary>
+        /// 输出XML
+        /// </summary>
+        /// <returns></returns>
+        public string ParseXML()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("<xml>");
+            foreach (string k in Parameters.Keys)
+            {
+                string v = (string)Parameters[k];
+                if (Regex.IsMatch(v, @"^[0-9.]$"))
+                {
+
+                    sb.Append("<" + k + ">" + v + "</" + k + ">");
+                }
+                else
+                {
+                    sb.Append("<" + k + "><![CDATA[" + v + "]]></" + k + ">");
+                }
+
+            }
+            sb.Append("</xml>");
+            return sb.ToString();
+        }
 	}
 }

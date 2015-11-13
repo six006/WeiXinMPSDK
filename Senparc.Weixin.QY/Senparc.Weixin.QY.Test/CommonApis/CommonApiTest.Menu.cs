@@ -12,12 +12,11 @@ namespace Senparc.Weixin.QY.Test.CommonApis
 {
     public partial class CommonApiTest
     {
-        private int _agentId = 2;
+        private int _agentId = 7;
 
         [TestMethod]
         public void CreateMenuTest()
         {
-            return;//已经通过测试
 
             var accessToken = AccessTokenContainer.GetToken(_corpId);
 
@@ -56,6 +55,11 @@ namespace Senparc.Weixin.QY.Test.CommonApis
                 url = "http://weixin.senparc.com",
                 name = "Url跳转"
             });
+            subButton.sub_button.Add(new SinglePicPhotoOrAlbumButton()
+            {
+                key = "SubClickRoot_Pic_Photo_Or_Album",
+                name = "微信拍照"
+            });
             bg.button.Add(subButton);
 
 
@@ -82,8 +86,6 @@ namespace Senparc.Weixin.QY.Test.CommonApis
         [TestMethod]
         public void DeleteMenuTest()
         {
-            return;//已经通过测试，删除之后，GetMenu将返回null
-
             var accessToken = AccessTokenContainer.GetToken(_corpId);
 
             var result = CommonApi.DeleteMenu(accessToken, _agentId);

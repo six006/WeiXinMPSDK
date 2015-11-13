@@ -8,7 +8,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Senparc.Weixin.MP.Test</RootNamespace>
     <AssemblyName>Senparc.Weixin.MP.Test</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
@@ -26,6 +26,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -34,17 +35,10 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Test|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\Test\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -66,12 +60,24 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="AdvancedAPIs\AutoReply\AutoReplyTest.cs" />
+    <Compile Include="AdvancedAPIs\Analysis\AnalysisTest.cs" />
+    <Compile Include="AdvancedAPIs\Card\CardAPITest.cs" />
     <Compile Include="AdvancedAPIs\CustomService\CustomServiceTest.cs" />
     <Compile Include="AdvancedAPIs\Custom\CustomTest.cs" />
-    <Compile Include="AdvancedAPIs\Groups\CustomTest.cs" />
+    <Compile Include="AdvancedAPIs\GroupMessage\GroupMessageTest.cs" />
+    <Compile Include="AdvancedAPIs\Groups\GroupTest.cs" />
     <Compile Include="AdvancedAPIs\Media\MediaTest.cs" />
     <Compile Include="AdvancedAPIs\OAuth\OAuthTest.cs" />
+    <Compile Include="AdvancedAPIs\Poi\PoiTest.cs" />
+    <Compile Include="AdvancedAPIs\Semantic\SemanticTest.cs" />
+    <Compile Include="AdvancedAPIs\ShakeAround\ShakeAroundTest.cs" />
     <Compile Include="AdvancedAPIs\Template\TemplateTest.cs" />
+    <Compile Include="CommonAPIs\JsApiTicketContainerTest.cs" />
+    <Compile Include="Entities\Request\PostModelTest.cs" />
+    <Compile Include="MessageHandlers\MessageHandlers_OmitRepeatMessageTest.cs" />
+    <Compile Include="RequestMessageFactoryTest.cs" />
+    <Compile Include="Senparc.Weixin.Utilites\HttpUtility\RequestUtilityTests.cs" />
     <Compile Include="TenPay\TenPayRightsTest.cs" />
     <Compile Include="AdvancedAPIs\User\CustomTest.cs" />
     <Compile Include="TenPay\TenPayTest.cs" />
@@ -86,20 +92,25 @@
     <Compile Include="Entities\Response\ResponseMessageBaseTest.cs" />
     <Compile Include="Helpers\BaiduMapHelperTest.cs" />
     <Compile Include="Helpers\GpsHelperTest.cs" />
-    <Compile Include="HttpUtility\RequestUtilityTest.cs" />
-    <Compile Include="HttpUtility\GetTest.cs" />
-    <Compile Include="HttpUtility\PostTest.cs" />
     <Compile Include="MessageHandlers\MessageHandlersTest.cs" />
     <Compile Include="MessageHandlers\MessageHandlers_CancelTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Helpers\MsgTypeHelperTest.cs" />
-    <Compile Include="RequestMessageFactoryTest.cs" />
     <Compile Include="Helpers\EntityHelperTest.cs" />
     <Compile Include="Helpers\GoogleMapHelperTest.cs" />
     <Compile Include="Helpers\DateTimeHelperTest.cs" />
     <Compile Include="Exceptions\WeixinExceptionTest.cs" />
     <Compile Include="ResponseMessageFactoryTest.cs" />
     <Compile Include="TenPayV3\TenPayV3Test.cs" />
+    <Compile Include="CommonAPIs\ApiHandlerWapperTest.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CommonAPIs\CommonApiTest.Menu.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Senparc.Weixin\Senparc.Weixin\Senparc.Weixin.csproj">
@@ -110,14 +121,6 @@
       <Project>{1d815fbf-451c-4e23-939c-cb80172f445c}</Project>
       <Name>Senparc.Weixin.MP</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config">
-      <SubType>Designer</SubType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="CommonAPIs\CommonApiTest.Menu.cs" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

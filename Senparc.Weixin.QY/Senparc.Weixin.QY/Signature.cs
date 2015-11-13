@@ -1,7 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿/*----------------------------------------------------------------
+    Copyright (C) 2015 Senparc
+  
+    文件名：Signature.cs
+    文件功能描述：检测签名
+    
+    
+    创建标识：Senparc - 20150313
+    
+    修改标识：Senparc - 20150313
+    修改描述：整理接口
+----------------------------------------------------------------*/
+
 using Tencent;
 
 namespace Senparc.Weixin.QY
@@ -32,7 +41,7 @@ namespace Senparc.Weixin.QY
         public static string GenarateSinature(string token, string timeStamp, string nonce, string msgEncrypt)
         {
             string msgSignature = null;
-            var result = Tencent.WXBizMsgCrypt.GenarateSinature(token, timeStamp, nonce, msgEncrypt, ref msgSignature);
+            var result = WXBizMsgCrypt.GenarateSinature(token, timeStamp, nonce, msgEncrypt, ref msgSignature);
             return result == 0 ? msgSignature : result.ToString();
         }
 

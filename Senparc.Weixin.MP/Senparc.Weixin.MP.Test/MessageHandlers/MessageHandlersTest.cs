@@ -18,6 +18,12 @@ namespace Senparc.Weixin.MP.Test.MessageHandlers
         {
         }
 
+        public CustomerMessageHandlers(RequestMessageBase requestMessage, PostModel postModel = null, int maxRecordCount = 0)
+            : base(requestMessage, postModel, maxRecordCount)
+        {
+        }
+
+
         public override IResponseMessageBase OnTextRequest(RequestMessageText requestMessage)
         {
             var responseMessage =
@@ -25,6 +31,13 @@ namespace Senparc.Weixin.MP.Test.MessageHandlers
                ResponseMessageText;
             responseMessage.Content = "文字信息";
             return responseMessage;
+        }
+
+        public override IResponseMessageBase OnEvent_LocationSelectRequest(RequestMessageEvent_Location_Select requestMessage)
+        {
+            var responeMessage = this.CreateResponseMessage<ResponseMessageText>();
+            responeMessage.Content = "OnEvent_LocationSelectRequest";
+            return responeMessage;
         }
 
         #region v1.5之后，所有的OnXX方法均从抽象方法变为虚方法，并都有默认返回消息操作，不需要处理的消息类型无需重写。
@@ -137,6 +150,42 @@ namespace Senparc.Weixin.MP.Test.MessageHandlers
         }
 
         [TestMethod]
+        public void Event_LocationSelectTest()
+        {
+            var requestXML = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<xml>
+<ToUserName>ToUserName</ToUserName>
+<FromUserName>FromUserName</FromUserName>
+<CreateTime>1444293582</CreateTime>
+<MsgType><![CDATA[event]]></MsgType>
+<Event><![CDATA[location_select]]></Event>
+<EventKey><![CDATA[ZBZXC]]></EventKey>
+<SendLocationInfo><Location_X><![CDATA[31]]></Location_X>
+<Location_Y><![CDATA[121]]></Location_Y>
+<Scale><![CDATA[15]]></Scale>
+<Label><![CDATA[嘉兴市南湖区政府东栅街道办事处(中环南路南)]]></Label>
+<Poiname><![CDATA[南湖区富润路/中环南路(路口)旁]]></Poiname>
+</SendLocationInfo>
+</xml>
+";
+            var messageHandlers = new CustomerMessageHandlers(XDocument.Parse(requestXML));
+            Assert.IsNotNull(messageHandlers.RequestDocument);
+            Assert.IsInstanceOfType(messageHandlers.RequestMessage,typeof(RequestMessageEvent_Location_Select));
+            Assert.AreEqual("ZBZXC",((RequestMessageEvent_Location_Select)messageHandlers.RequestMessage).EventKey);
+
+            messageHandlers.Execute();
+            Assert.IsNotNull(messageHandlers.ResponseMessage);
+            Assert.IsNotNull(messageHandlers.ResponseDocument);
+            Assert.IsFalse(messageHandlers.UsingEcryptMessage);//没有使用加密模式
+            Assert.IsFalse(messageHandlers.UsingCompatibilityModelEcryptMessage);//没有加密模式，所以也没有兼容模式
+
+            Console.WriteLine(messageHandlers.ResponseDocument.ToString());
+            Assert.AreEqual("ToUserName", messageHandlers.ResponseMessage.FromUserName);
+            Assert.IsInstanceOfType(messageHandlers.ResponseMessage,typeof(ResponseMessageText));
+            Assert.AreEqual("OnEvent_LocationSelectRequest",((ResponseMessageText)messageHandlers.ResponseMessage).Content);
+        }
+
+        [TestMethod]
         public void EcryptMessageRequestTest()
         {
             //兼容模式测试
@@ -175,7 +224,7 @@ namespace Senparc.Weixin.MP.Test.MessageHandlers
     <ToUserName><![CDATA[gh_a96a4a619366]]></ToUserName>
     <Encrypt><![CDATA[2gUBUpAeuPFKBS+gkcvrR1cBq1VjTOQluB7+FQF00VnybRpYR3xko4S4wh0qD+64cWmJfF93ZNLm+HLZBexjHLAdJBs5RBG2rP1AJnU0/1vQU/Ac9Q1Nq7vfC4l3ciF8YwhQW0o/GE4MYWWakgdwnp0hQ7aVVwqMLd67A5bsURQHJiFY/cH0fVlsKe6J3aazGhRXFCxceOq2VTJ2Eulc8aBDVSM5/lAIUA/JPq5Z2RzomM0+aoa5XIfGyAtAdlBXD0ADTemxgfYAKI5EMfKtH5za3dKV2UWbGAlJQZ0fwrwPx6Rs8MsoEtyxeQ52gO94gafA+/kIVjamKTVLSgudLLz5rAdGneKkBVhXyfyfousm1DoDRjQdAdqMWpwbeG5hanoJyJiH+humW/1q8PAAiaEfA+BOuvBk/a5xL0Q2l2k=]]></Encrypt>
 </xml>";
-             messageHandlers = new CustomerMessageHandlers(XDocument.Parse(ecryptXml), postModel);
+            messageHandlers = new CustomerMessageHandlers(XDocument.Parse(ecryptXml), postModel);
             Assert.IsNotNull(messageHandlers.RequestDocument);
             Assert.IsNotNull(messageHandlers.RequestMessage);
             Assert.IsNotNull(messageHandlers.RequestMessage.Encrypt);
@@ -334,6 +383,30 @@ namespace Senparc.Weixin.MP.Test.MessageHandlers
 
             Assert.IsInstanceOfType(messageHandler.ResponseMessage, typeof(ResponseMessageText));
             Assert.AreEqual("您发送的消息类型暂未被识别。", ((ResponseMessageText)messageHandler.ResponseMessage).Content);
+        }
+
+        /// <summary>
+        /// 专为测试用的构造函数测试
+        /// </summary>
+        [TestMethod]
+        public void TestConstructorTest()
+        {
+            var requestMessage = new RequestMessageText()
+            {
+                Content = "Hi",
+                CreateTime = DateTime.Now,
+                FromUserName = "FromeUserName",
+                ToUserName = "ToUserName",
+                MsgId = 123,
+            };
+            var messageHandler = new CustomerMessageHandlers(requestMessage);
+            messageHandler.Execute();
+
+            //TestMessageHandlers中没有处理坐标信息的重写方法，将返回默认消息
+
+
+            Assert.IsInstanceOfType(messageHandler.ResponseMessage, typeof(ResponseMessageText));
+            Assert.AreEqual("文字信息", ((ResponseMessageText)messageHandler.ResponseMessage).Content);
         }
     }
 }
